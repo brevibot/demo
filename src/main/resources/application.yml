@@ -18,10 +18,11 @@ spring:
 data:
   primary:
     ddl-auto: create # Options: create, create-drop, update, validate, none
+    mode: always # Options: always, never
     scripts:
       - "classpath:sql/db1-data.sql"
   secondary:
     ddl-auto: create
+    mode: always # Options: always, never
     scripts:
       - "classpath:sql/db2-data.sql"
-

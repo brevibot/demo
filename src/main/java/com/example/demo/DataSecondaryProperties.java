@@ -7,6 +7,7 @@ import java.util.List;
 public class DataSecondaryProperties {
     private String ddlAuto;
     private List<String> scripts;
+    private String mode = "never"; // Default to never
 
     public String getDdlAuto() {
         return ddlAuto;
@@ -22,5 +23,13 @@ public class DataSecondaryProperties {
 
     public void setScripts(List<String> scripts) {
         this.scripts = scripts;
+    }
+    
+    public String getMode() {
+        return mode;
+    }
+
+    public void setMode(String mode) {
+        this.mode = mode;
     }
 }

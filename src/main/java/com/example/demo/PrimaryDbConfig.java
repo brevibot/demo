@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +26,7 @@ import java.util.stream.Stream;
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-        basePackages = "com.example.demo.db1.repo",
+        basePackages = "com.example.demo.db1",
         entityManagerFactoryRef = "primaryEntityManagerFactory",
         transactionManagerRef = "primaryTransactionManager"
 )
@@ -44,7 +45,7 @@ public class PrimaryDbConfig {
 
         return builder
                 .dataSource(dataSource)
-                .packages("com.example.demo.db1.model")
+                .packages("com.example.demo.db1")
                 .persistenceUnit("db1")
                 .properties(properties)
                 .build();
@@ -58,6 +59,7 @@ public class PrimaryDbConfig {
     }
 
     @Bean
+    @ConditionalOnProperty(name = "data.primary.mode", havingValue = "always")
     public DataSourceInitializer primaryDataSourceInitializer(
             @Qualifier("primaryDataSource") DataSource dataSource,
             DataPrimaryProperties primaryJpaProperties) throws IOException {
