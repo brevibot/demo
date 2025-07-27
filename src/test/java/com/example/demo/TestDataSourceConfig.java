@@ -17,6 +17,7 @@ public class TestDataSourceConfig {
         return new EmbeddedDatabaseBuilder()
                 .setType(EmbeddedDatabaseType.H2)
                 .setName("db1")
+                .addScript("classpath:sql/db1-schema.sql")
                 .addScript("classpath:sql/db1-data.sql")
                 .build();
     }
@@ -26,6 +27,7 @@ public class TestDataSourceConfig {
         return new EmbeddedDatabaseBuilder()
                 .setType(EmbeddedDatabaseType.H2)
                 .setName("db2")
+                .addScript("classpath:sql/db2-schema.sql")
                 .addScript("classpath:sql/db2-data.sql")
                 .build();
     }
