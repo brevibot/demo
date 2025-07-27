@@ -19,40 +19,40 @@ import java.util.List;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // 1. Configure CORS to allow requests from the Next.js frontend
+            // 1. Configure CORS
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             
-            // 2. Configure CSRF protection
+            // 2. Enable and Configure CSRF
             .csrf(csrf -> csrf
-                // Use CookieCsrfTokenRepository to send the token as a cookie to the frontend.
-                // withHttpOnlyFalse() is necessary so JavaScript can read the cookie.
+                // Use CookieCsrfTokenRepository to send the token as a cookie.
+                // withHttpOnlyFalse() allows JavaScript on the frontend to read it.
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                // Use a custom handler to ensure the CSRF token is loaded on every request
+                // Use a handler to ensure the token is available to the frontend.
                 .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
             )
             
-            // 3. Configure Authorization Rules
+            // 3. Configure Authorization
             .authorizeHttpRequests(authorize -> authorize
-                // Allow GET requests to /api/hello without authentication to establish the session and get the CSRF token
-                .requestMatchers("/api/hello").permitAll()
-                // All other requests must be authenticated (in a real app)
-                .anyRequest().permitAll() // For this example, we permit all to simplify.
+                // You can permit all for this example, or secure endpoints as needed.
+                .anyRequest().permitAll()
             );
 
         return http.build();
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // IMPORTANT: Replace with your Next.js app's actual origin in production
-        configuration.setAllowedOrigins(List.of("http://localhost:3000")); 
+        // Ensure your frontend origin is allowed
+        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        // Allow common methods, including OPTIONS for pre-flight requests
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // Allow credentials (cookies)
+        configuration.setAllowCredentials(true);
+        // Allow all headers, including the custom X-XSRF-TOKEN
         configuration.setAllowedHeaders(List.of("*"));
-        // This is crucial for sending cookies across origins
-        configuration.setAllowCredentials(true); 
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
