@@ -1,8 +1,7 @@
 package com.example.demo;
 
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,26 +29,18 @@ import java.util.stream.Stream;
         entityManagerFactoryRef = "primaryEntityManagerFactory",
         transactionManagerRef = "primaryTransactionManager"
 )
+@EnableConfigurationProperties(DataPrimaryProperties.class)
 public class PrimaryDbConfig {
-
-    // Bind to the custom 'data.primary' properties from application.yml
-    @Bean
-    @Primary
-    @ConfigurationProperties("data.primary")
-    public JpaProperties primaryJpaProperties() {
-        return new JpaProperties();
-    }
 
     @Primary
     @Bean(name = "primaryEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean primaryEntityManagerFactory(
             EntityManagerFactoryBuilder builder,
             @Qualifier("primaryDataSource") DataSource dataSource,
-            @Qualifier("primaryJpaProperties") JpaProperties jpaProperties) {
+            DataPrimaryProperties primaryJpaProperties) {
         
-        // Pass the ddl-auto property to the entity manager
         Map<String, String> properties = new HashMap<>();
-        properties.put("hibernate.hbm2ddl.auto", jpaProperties.getDatabasePlatform());
+        properties.put("hibernate.hbm2ddl.auto", primaryJpaProperties.getDdlAuto());
 
         return builder
                 .dataSource(dataSource)
@@ -66,16 +57,14 @@ public class PrimaryDbConfig {
         return new JpaTransactionManager(primaryEntityManagerFactory.getObject());
     }
 
-    // This bean will initialize the primary database with the scripts
     @Bean
     public DataSourceInitializer primaryDataSourceInitializer(
             @Qualifier("primaryDataSource") DataSource dataSource,
-            @Qualifier("primaryJpaProperties") JpaProperties jpaProperties) throws IOException {
+            DataPrimaryProperties primaryJpaProperties) throws IOException {
         
         ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
-        String[] scriptLocations = jpaProperties.getSql().getInit().getDataLocations().toArray(new String[0]);
+        String[] scriptLocations = primaryJpaProperties.getScripts().toArray(new String[0]);
         
-        // Load all specified scripts
         Resource[] resources = Stream.of(scriptLocations)
                 .flatMap(location -> {
                     try {
