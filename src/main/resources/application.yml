@@ -1,0 +1,27 @@
+# JNDI DataSource Lookups
+spring:
+  datasource:
+    primary:
+      jndi-name: "java:comp/env/jdbc/db1"
+    secondary:
+      jndi-name: "java:comp/env/jdbc/db2"
+  # Enable H2 console
+  h2:
+    console:
+      enabled: true
+  # Disable default SQL initialization; we are handling it manually
+  sql:
+    init:
+      mode: never
+
+# Custom Data Initialization Configuration
+data:
+  primary:
+    ddl-auto: create # Options: create, create-drop, update, validate, none
+    scripts:
+      - "classpath:sql/db1-data.sql"
+  secondary:
+    ddl-auto: create
+    scripts:
+      - "classpath:sql/db2-data.sql"
+
